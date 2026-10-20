@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Email Duel – Make Karl furious</title>
+<style>
+:root{--bg:#e8edf0;--panel:#f8fafb;--ink:#17232b;--mute:#587080;--line:#c9d4da;--me:#cfe3f0;--red:#d6342b;--amber:#f0a22e;--ok:#2f8f6b}
+@media (prefers-color-scheme:dark){:root{--bg:#10181d;--panel:#1a252c;--ink:#eaf1f5;--mute:#93a9b6;--line:#2c3c46;--me:#24465c}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+main{max-width:600px;margin:0 auto;padding:18px 14px 40px}
+h1{font:700 1.9rem/1.1 Georgia,"Times New Roman",serif;margin:6px 0 4px}
+.sub{color:var(--mute);margin:0 0 16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.rage{display:flex;align-items:center;gap:12px}
+#face{font-size:2.4rem;line-height:1;transition:transform .3s}
+.rage .col{flex:1}
+.rage .lab{display:flex;justify-content:space-between;font-size:.9rem;color:var(--mute);margin-bottom:4px}
+.track{height:16px;border-radius:8px;background:var(--line);overflow:hidden}
+#fill{height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--red));transition:width .9s}
+.msg{border-radius:10px;padding:10px 12px;margin:8px 0;white-space:pre-wrap}
+.karl{background:var(--panel);border:1px solid var(--line);font-family:Georgia,"Times New Roman",serif}
+.me{background:var(--me);margin-left:28px}
+.from{font:600 .8rem system-ui,sans-serif;color:var(--mute);margin-bottom:2px}
+.verdict{font-size:.88rem;color:var(--mute);margin:-2px 0 6px 4px}
+.verdict b{color:var(--red)}
+textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;color:var(--ink);background:var(--bg);resize:vertical}
+textarea:focus-visible,button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:var(--mute);font-size:.9rem}
+button{font:700 1rem inherit;font-family:inherit;border:0;border-radius:8px;padding:11px 18px;background:var(--red);color:#fff;cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+#jar{display:none;color:var(--red);font-weight:700;margin-top:8px}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}#fill{transition:none}}
+#end{display:none;text-align:center}
+#end h2{font:700 1.4rem Georgia,serif;margin:0 0 6px}
+</style>
+</head>
+<body>
+<main>
+<h1>Email Duel</h1>
+<p class="sub">Make Karl from Accounting furious in three emails. No swearing – be creative.</p>
+
+<div class="panel rage" aria-live="polite">
+  <div id="face">😐</div>
+  <div class="col">
+    <div class="lab"><span>Karl’s rage</span><b id="pct">0%</b></div>
+    <div class="track"><div id="fill"></div></div>
+  </div>
+</div>
+
+<div id="thread">
+  <div class="msg karl"><div class="from">Karl, Accounting</div>Subject: Q3 expense report – did you finish it?
+Hello. I’m still waiting on your receipts. Please reply with the correct file format (.xlsx, not .pdf). Thank you.</div>
+</div>
+
+<div class="panel" id="compose">
+  <label for="mail" class="from">Your email to Karl</label>
+  <textarea id="mail" maxlength="800" placeholder="Write something that gets under Karl’s skin…"></textarea>
+  <div id="jar">🫙 Swear jar! Rephrase it – Karl is only allowed to be offended by creativity.</div>
+  <div class="bar"><span id="round">Email 1 of 3</span><button id="send">Send email</button></div>
+</div>
+
+<div class="panel" id="end">
+  <h2 id="title"></h2>
+  <p id="score" class="sub"></p>
+  <button id="again">Play again</button>
+</div>
+</main>
+
+<script>
+const MAX=3;
+const BAD=/\b(fuck\w*|shit\w*|bitch\w*|asshole\w*|bastard\w*|arsch\w*|schei(ß|ss)\w*|wichser\w*|fotze\w*|hurensohn\w*)\b/i;
+const $=id=>document.getElementById(id);
+let rage=0,round=0,hist=[],busy=false;
+const opener=$("thread").innerHTML;
+
+function face(p){return p<15?"😐":p<35?"😒":p<60?"😠":p<85?"😡":"🤯"}
+function setRage(p){rage=p;$("pct").textContent=p+"%";$("fill").style.width=p+"%";$("face").textContent=face(p)}
+function add(cls,from,text){
+  const d=document.createElement("div");d.className="msg "+cls;
+  const f=document.createElement("div");f.className="from";f.textContent=from;
+  d.appendChild(f);d.appendChild(document.createTextNode(text));
+  $("thread").appendChild(d);d.scrollIntoView({behavior:"smooth",block:"nearest"});return d;
+}
+function verdict(t){
+  if(!t)return;const v=document.createElement("div");v.className="verdict";
+  const b=document.createElement("b");b.textContent="Referee: ";v.appendChild(b);v.appendChild(document.createTextNode(t));
+  $("thread").appendChild(v);
+}
+function rank(p){
+  return p>=90?["Office Legend 🏆","Karl is drafting a resignation letter about the stapler."]
+   :p>=65?["Professional Pest 😈","HR has opened a folder with your name on it."]
+   :p>=35?["Mildly Annoying 😬","Karl sighed. Twice. That counts."]
+   :["Too Polite 🍎","HR sends you a fruit basket."];
+}
+async function send(){
+  if(busy)return;
+  const text=$("mail").value.trim();if(!text)return;
+  if(BAD.test(text)){const j=$("jar");j.style.display="block";j.classList.remove("shake");void j.offsetWidth;j.classList.add("shake");return}
+  $("jar").style.display="none";busy=true;$("send").disabled=true;$("send").textContent="Sending…";
+  add("me","You",text);$("mail").value="";
+  const wait=add("karl","Karl, Accounting","Karl is typing…");
+  try{
+    const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,history:hist,rage})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||"Something went wrong.");
+    wait.lastChild.textContent=d.reply;
+    hist.push({role:"user",text},{role:"model",text:d.reply});
+    setRage(d.rage);verdict(d.verdict);round++;
+    if(round>=MAX)finish();else $("round").textContent="Email "+(round+1)+" of "+MAX;
+  }catch(e){
+    wait.lastChild.textContent="⚠️ "+e.message+" Your email was not counted – try again.";
+    $("mail").value=text;
+  }
+  busy=false;$("send").disabled=false;$("send").textContent="Send email";
+}
+function finish(){
+  $("compose").style.display="none";$("end").style.display="block";
+  const [t,s]=rank(rage);$("title").textContent=t;$("score").textContent="Final rage: "+rage+"%. "+s;
+  $("end").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function reset(){
+  rage=0;round=0;hist=[];setRage(0);$("thread").innerHTML=opener;
+  $("round").textContent="Email 1 of "+MAX;$("compose").style.display="block";$("end").style.display="none";
+}
+$("send").onclick=send;$("again").onclick=reset;
+</script>
+</body>
+</html>
